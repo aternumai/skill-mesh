@@ -1,0 +1,47 @@
+schema_version: 0
+id: com.skillmesh.example.hello
+name: Hello Skill
+version: 0.1.0
+summary: Example portable skill package.
+source:
+  canonical_files:
+    - SKILL.md
+targets:
+  runtimes:
+    - codex
+    - openclaw
+    - cloud-code
+  model_families:
+    - gpt
+    - claude
+    - gemini
+constraints:
+  requires_tools:
+    - github
+  disallowed_environments: []
+  max_context_tokens: null
+overlays:
+  runtime:
+    codex: overlays/runtime/codex
+    openclaw: overlays/runtime/openclaw
+    cloud-code: overlays/runtime/cloud-code
+  model_family:
+    gpt: overlays/model-family/gpt
+validation:
+  sources:
+    runtime_docs:
+      codex:
+        kind: docs
+        ref: https://platform.openai.com/docs
+      openclaw:
+        kind: git
+        ref: https://github.com/example/openclaw
+        versionSource: tags
+      cloud-code:
+        kind: git
+        ref: https://github.com/example/cloud-code
+        versionSource: tags
+    authoring_standards:
+      skill_markdown:
+        kind: file
+        ref: docs/standards/skill-format.md
