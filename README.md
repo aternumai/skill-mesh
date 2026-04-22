@@ -47,6 +47,15 @@ The initial wedge is intentionally narrow:
 ```text
 .
 ├── README.md
+├── package.json
+├── tsconfig.json
+├── src
+│   ├── cli.ts
+│   ├── manifest.ts
+│   ├── types.ts
+│   └── validator.ts
+├── examples
+│   └── hello-skill
 └── docs
     ├── package-format.md
     └── prd.md
@@ -56,6 +65,26 @@ The initial wedge is intentionally narrow:
 
 - [`docs/prd.md`](./docs/prd.md): one-page product brief for the MVP
 - [`docs/package-format.md`](./docs/package-format.md): canonical package format, overlay model, resolver behavior, and release metadata
+
+## First Executable Slice
+
+The repo now includes a minimal TypeScript CLI that validates a canonical `skillmesh.yaml` package and prints runtime compatibility summaries.
+
+Current scope:
+
+- load a package manifest
+- validate required package structure
+- inspect runtime targets for `codex`, `openclaw`, and `cloud-code`
+- surface validation sources, warnings, and blocking issues
+- provide an example package under `examples/hello-skill`
+
+Example usage after installing dependencies and building:
+
+```bash
+npm install
+npm run build
+node dist/cli.js validate examples/hello-skill
+```
 
 ## Design Principles
 
@@ -67,8 +96,8 @@ The initial wedge is intentionally narrow:
 
 ## Near-Term Build Sequence
 
-1. Define the canonical package format and manifest.
-2. Implement compatibility rules for Codex, OpenClaw, and Cloud Code.
-3. Build target rendering and release preview.
-4. Add local export/install flows.
+1. Expand manifest validation into a formal schema.
+2. Implement version-aware compatibility rules from real runtime sources.
+3. Add target rendering and release preview generation.
+4. Add local export and install flows.
 5. Add a versioned local catalog, resolver, and paid private publishing path.
