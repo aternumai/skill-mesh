@@ -29,6 +29,9 @@ skill/
 │   │   ├── codex/
 │   │   │   ├── SKILL.md
 │   │   │   └── skillmesh.overlay.yaml
+│   │   ├── cloud-code/
+│   │   │   ├── SKILL.md
+│   │   │   └── skillmesh.overlay.yaml
 │   │   └── openclaw/
 │   │       ├── SKILL.md
 │   │       └── skillmesh.overlay.yaml
@@ -74,6 +77,7 @@ source:
 targets:
   runtimes:
     - codex
+    - cloud-code
     - openclaw
   model_families:
     - gpt
@@ -87,6 +91,7 @@ constraints:
 overlays:
   runtime:
     codex: overlays/runtime/codex
+    cloud-code: overlays/runtime/cloud-code
     openclaw: overlays/runtime/openclaw
   model_family:
     gpt: overlays/model-family/gpt
@@ -98,6 +103,24 @@ exports:
     enabled: true
   registry:
     enabled: false
+validation:
+  sources:
+    runtime_docs:
+      codex:
+        kind: docs
+        ref: https://platform.openai.com/docs
+      cloud-code:
+        kind: git
+        ref: https://github.com/example/cloud-code
+        version_source: tags
+      openclaw:
+        kind: git
+        ref: https://github.com/example/openclaw
+        version_source: tags
+    authoring_standards:
+      skill_markdown:
+        kind: file
+        ref: docs/standards/skill-format.md
 ```
 
 ## Overlay Rules
@@ -146,11 +169,13 @@ Compatibility should be validated, not inferred by vibe.
 Each target result should produce:
 
 - status: `compatible`, `compatible_with_warnings`, `requires_adapter`, or `incompatible`
+- validated target version
 - preserved fields
 - dropped fields
 - transformed fields
 - warnings
 - blocking issues
+- validation sources consulted
 
 ### Initial Runtime Checks
 
@@ -162,6 +187,17 @@ Validate:
 - expected install layout
 - supported metadata fields
 - tool or capability assumptions declared by the skill
+- compatibility against a specific documented runtime version
+
+#### Cloud Code
+
+Validate:
+
+- required instruction file presence
+- expected install layout
+- supported metadata fields and packaging rules
+- compatibility against a specific released version, preferably derived from repository tags or official release docs
+- capability mismatches against declared constraints
 
 #### OpenClaw
 
@@ -171,6 +207,17 @@ Validate:
 - expected install layout
 - unsupported metadata or path conventions
 - capability mismatches against declared constraints
+- compatibility against a specific released version, preferably derived from repository tags or official release docs
+
+### Validation Inputs
+
+Compatibility analysis should rely on explicit sources:
+
+- official runtime documentation when available
+- public release references such as git tags or release artifacts
+- declared skill authoring standards that define canonical packaging rules
+
+If those sources are missing or stale, the system should downgrade confidence and say so explicitly instead of pretending validation is complete.
 
 ## Resolver Behavior
 
@@ -181,6 +228,7 @@ Resolver input should include:
 - skill ID
 - requested version or range
 - runtime
+- target runtime version or version policy such as `latest-stable`
 - model family
 - explicit model, if known
 - available tools or capabilities
@@ -190,17 +238,19 @@ Resolver output should include:
 - selected artifact
 - overlays applied in order
 - exact-match or fallback reason
+- validated target version
 - compatibility warnings
 
 ### Resolution Strategy
 
 1. Find package by ID and version constraint.
-2. Confirm runtime compatibility.
-3. Prefer explicit model overlay if compatible.
-4. Otherwise prefer model-family overlay if compatible.
-5. Otherwise use runtime overlay plus base.
-6. Otherwise use base if explicitly marked compatible.
-7. If no compatible path exists, fail with reasons.
+2. Resolve the requested runtime version or the best documented compatible version.
+3. Confirm runtime compatibility against that version.
+4. Prefer explicit model overlay if compatible.
+5. Otherwise prefer model-family overlay if compatible.
+6. Otherwise use runtime overlay plus base.
+7. Otherwise use base if explicitly marked compatible.
+8. If no compatible path exists, fail with reasons.
 
 ## Release Metadata
 
@@ -212,9 +262,18 @@ Suggested release record:
 release_version: 0.1.0
 package_id: com.example.skill.audit-pr
 created_at: 2026-04-22T00:00:00Z
+validation_sources:
+  - kind: docs
+    target: codex
+    ref: https://platform.openai.com/docs
+    version: 2026-04
+  - kind: git_tag
+    target: openclaw
+    ref: v1.4.2
 targets:
   - target_id: codex-gpt
     runtime: codex
+    runtime_version: 2026-04
     model_family: gpt
     overlays_applied:
       - overlays/runtime/codex
@@ -254,6 +313,13 @@ Minimum registry responsibilities:
 - store immutable release artifacts
 - store compatibility summaries
 - resolve latest compatible version for a target
+- record the runtime versions and validation sources tied to each published artifact
+
+## Monetization Direction
+
+The simplest viable monetization path for the MVP is paid private registry publishing for teams.
+
+That keeps the product close to the core workflow instead of inventing a separate marketplace too early. Free usage can cover local authoring, validation, and export, while paid plans unlock hosted private catalogs, team sharing, and managed release history.
 
 ## Guardrails
 

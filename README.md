@@ -34,11 +34,13 @@ Chat can explain warnings or propose overlays, but the product's center of gravi
 The initial wedge is intentionally narrow:
 
 - canonical skill repo format
-- compatibility validation for Codex and OpenClaw
+- compatibility validation for Codex, OpenClaw, and Cloud Code
 - model-family overlays for `gpt`, `claude`, and `gemini`
 - local export and install
 - release preview with diff
 - versioned local registry or git-backed catalog
+- version-aware validation grounded in official docs and release tags
+- paid private registry publishing as the simplest MVP monetization layer
 
 ## Repository Layout
 
@@ -66,8 +68,7 @@ The initial wedge is intentionally narrow:
 ## Near-Term Build Sequence
 
 1. Define the canonical package format and manifest.
-2. Implement compatibility rules for Codex and OpenClaw.
+2. Implement compatibility rules for Codex, OpenClaw, and Cloud Code.
 3. Build target rendering and release preview.
 4. Add local export/install flows.
-5. Add a versioned local catalog and resolver.
-
+5. Add a versioned local catalog, resolver, and paid private publishing path.
